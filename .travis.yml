@@ -12,7 +12,9 @@ notifications:
       - chaos@xuyuanxiang.cn
     on_success: never
     on_failure: always
-before_deploy: npm run compile
+before_deploy:
+  - npm run compile
+  - npm run build
 deploy:
   - provider: npm
     edge: true
