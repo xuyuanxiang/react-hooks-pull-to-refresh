@@ -63,6 +63,7 @@
     "@types/styled-components": "^5.0.1",
     "babel-loader": "^8.1.0",
     "babel-plugin-styled-components": "^1.10.7",
+    "conventional-changelog": "^3.1.18",
     "cross-env": "^7.0.2",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
@@ -92,6 +93,7 @@
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "compile": "rollup -c",
     "watch": "tsc -w -p .",
+    "gen": "node scripts/writeLog.js",
     "build": "cross-env BABEL_ENV=production NODE_ENV=production build-storybook --no-dll --quiet -o public"
   },
   "husky": {

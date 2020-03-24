@@ -1,0 +1,53 @@
+import { Meta, Props } from '@storybook/addon-docs/blocks';
+
+<Meta title="Basic|Usage" />
+
+# Installation
+
+```npm
+npm install react-hooks-pull-to-refresh
+```
+
+```yarn
+yarn add react-hooks-pull-to-refresh
+```
+
+# Usage
+
+```javascript
+import React, { useState } from 'react';
+import { usePullToRefresh } from 'react-hooks-pull-to-refresh';
+
+function MyComponent() {
+  const [dataSource, setDataSource] = useState<string[]>(['item1', 'item2']);
+
+  const onRefresh = async (): Promise<void> => {
+    const res = await fetch('/api/to/something');
+    if (res.ok) {
+      const { data } = await res.json();
+      setDataSource(data);
+    }
+  };
+
+  const options = {}; // see the table below.
+  const ref = usePullToRefresh(onRefresh, options);
+
+  return (
+    <div ref={ref} style={{ background: '#ffffff', paddingLeft: 16 }}>
+        {dataSource.map((it, idx) => (
+          <p key={`item_${idx}`} style={{ height: 44, lineHeight: 44, borderBottom: '1px solid #dcdcdc' }}>
+            {it}
+          </p>
+        ))}
+    </div>
+  );
+}
+```
+
+Options:
+
+| Name | Description | Default |
+| :-- | :-- | :-- |
+| threshold | Threshold in pixels for calling onRefresh. The content view have been pulled to within threshold of the bottom. | 50 |
+| throttle | This controls how often the `touchmove` event will be handled（as a time interval in ms）. A lower number yields better accuracy for code that is tracking the touchmove position, but can lead to performance problems. | 150 |
+| refreshControl | A RefreshControl component, used to provide pull-to-refresh rendering functionality. | RefreshControl |

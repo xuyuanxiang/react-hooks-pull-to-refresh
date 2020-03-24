@@ -6,7 +6,7 @@ const stream = conventionalChangelog({
   preset: 'angular',
   releaseCount: 0,
 });
-stream.on('data', chunk => {
+stream.on('data', (chunk) => {
   changeLog += chunk;
 });
 stream.on('end', () => {
@@ -15,16 +15,16 @@ stream.on('end', () => {
 
 function write(data) {
   writeFile(
-    'packages/components/src/Changelog.stories.mdx',
+    'src/__stories__/Changelog.stories.mdx',
     `import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Basic|Changelog" />
+<Meta title="Basic|发布日志" />
 
 ${data}
 
 `,
     'utf8',
-    err => {
+    (err) => {
       if (err) {
         console.error(err);
         process.exit(1);

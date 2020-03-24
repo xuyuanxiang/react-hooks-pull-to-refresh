@@ -1,4 +1,4 @@
-import React, { ReactNode, forwardRef } from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { RefreshState } from './RefreshState';
 import { Indicator } from './Indicator';
@@ -25,16 +25,20 @@ const Wrapper = styled.div`
   padding: 32px;
 `;
 
-export const RefreshControl = forwardRef<HTMLDivElement, IRefreshControlProps>(
-  ({ hint = <p>下拉可以刷新</p>, edge = <p>释放后刷新</p>, indicator = <Indicator /> }, ref) => (
+export function RefreshControl({
+  hint = <p>下拉可以刷新</p>,
+  edge = <p>释放后刷新</p>,
+  indicator = <Indicator />,
+}: IRefreshControlProps): JSX.Element {
+  return (
     <RefreshControlConsumer>
       {(state) => (
-        <Wrapper ref={ref}>
+        <Wrapper>
           {state === RefreshState.DID_MOUNT && hint}
           {state === RefreshState.WILL_REFRESH && edge}
           {state === RefreshState.REFRESHING && indicator}
         </Wrapper>
       )}
     </RefreshControlConsumer>
-  ),
-);
+  );
+}

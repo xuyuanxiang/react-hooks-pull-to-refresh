@@ -55,11 +55,16 @@ export function usePullToRefresh<T extends HTMLElement>(
     return 0;
   }
 
-  function transformY(y: number): void {
+  function transformY(y: string | number): void {
     if (containerRef.current) {
-      const value = toFixed(y, 2);
-      containerRef.current.style.transform = `translateY(${value}px)`;
-      containerRef.current.style.webkitTransform = `translateY(${value}px)`;
+      if (typeof y === 'number') {
+        const value = toFixed(y, 2);
+        containerRef.current.style.transform = `translateY(${value}px)`;
+        containerRef.current.style.webkitTransform = `translateY(${value}px)`;
+      } else {
+        containerRef.current.style.transform = `translateY(${y})`;
+        containerRef.current.style.webkitTransform = `translateY(${y})`;
+      }
     }
   }
 
@@ -139,7 +144,7 @@ export function usePullToRefresh<T extends HTMLElement>(
       }
       if (state === RefreshState.INITIALIZING) {
         if (distance > 0) {
-          const ref = React.createRef<HTMLDivElement>();
+          transformY('-100%');
           ReactDOM.render(
             <RefreshControlProvider value={RefreshState.DID_MOUNT}>
               <RefreshControl />
@@ -147,14 +152,6 @@ export function usePullToRefresh<T extends HTMLElement>(
             refresherRoot,
             () => {
               state = RefreshState.DID_MOUNT;
-              if (ref.current) {
-                destY = -ref.current.getBoundingClientRect().height;
-                if (containerRef.current) {
-                  containerRef.current.style.transition = originTransition;
-                  containerRef.current.style.webkitTransition = originWebkitTransition;
-                  transformY(destY);
-                }
-              }
             },
           );
         }

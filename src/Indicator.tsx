@@ -57,19 +57,13 @@ const StyledIndicator = styled.span<{ size: number; color: string }>`
 
 export interface IIndicatorProps {
   /**
-   * 颜色
+   * CSS colors.
    */
   color?: string;
-  /**
-   * 扩展样式（CSS属性）
-   */
   style?: CSSProperties;
-  /**
-   * 扩展样式（CSS类名）
-   */
   className?: string;
   /**
-   * 预设string类型或者自定义number类型的具体数值。
+   * The width and height value in pixels.
    */
   size?: number;
 }
