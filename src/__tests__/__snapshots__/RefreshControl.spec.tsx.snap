@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<RefreshControl/> should render default props 1`] = `
+.c0 {
+  background-color: #f6f6f6;
+  text-align: center;
+  padding: 32px;
+}
+
+<html>
+  <head>
+    <style
+      data-styled="active"
+      data-styled-version="5.0.1"
+    >
+      .c0{background-color:#f6f6f6;text-align:center;padding:32px;}
+    </style>
+  </head>
+  <body>
+    <div>
+      <div
+        class="c0"
+      >
+        <p>
+          下拉可以刷新
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+`;
