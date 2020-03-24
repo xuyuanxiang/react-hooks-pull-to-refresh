@@ -1,11 +1,11 @@
-import React, { DependencyList, ElementType, RefObject, useLayoutEffect, useRef } from 'react';
+import React, { DependencyList, RefObject, useLayoutEffect, useRef, ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import _throttle from 'lodash.throttle';
 import { RefreshState } from './RefreshState';
 import { toFixed } from './toFixed';
 import { debounceTimingFn } from './debounceTimingFn';
 import { rAF } from './rAF';
-import { IRefreshControlProps, RefreshControl } from './RefreshControl';
+import { RefreshControl } from './RefreshControl';
 import { RefreshControlProvider } from './RefreshControlContext';
 
 export type RefreshCallback = () => Promise<void | undefined>;
@@ -18,7 +18,7 @@ export interface IUsePullToRefreshOptions {
   /**
    * 下拉刷新视图容器
    */
-  refreshControl: ElementType<IRefreshControlProps>;
+  refreshControl: ReactNode;
   /**
    * 节流器限制频率，更小的数值能够更及时的跟踪滚动位置，不过可能会带来性能问题。单位：毫秒，缺省值：150。
    */
@@ -28,7 +28,7 @@ export interface IUsePullToRefreshOptions {
 const DEFAULTS: IUsePullToRefreshOptions = {
   threshold: 50,
   throttle: 150,
-  refreshControl: RefreshControl,
+  refreshControl: <RefreshControl />,
 };
 
 export function usePullToRefresh<T extends HTMLElement>(
@@ -36,7 +36,7 @@ export function usePullToRefresh<T extends HTMLElement>(
   {
     threshold = DEFAULTS.threshold,
     throttle = DEFAULTS.throttle,
-    refreshControl: RefreshControl = DEFAULTS.refreshControl,
+    refreshControl = DEFAULTS.refreshControl,
   }: Partial<IUsePullToRefreshOptions> = DEFAULTS,
   deps?: DependencyList,
 ): RefObject<T> {
@@ -146,9 +146,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (distance > 0) {
           transformY('-100%');
           ReactDOM.render(
-            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>
-              <RefreshControl />
-            </RefreshControlProvider>,
+            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>{refreshControl}</RefreshControlProvider>,
             refresherRoot,
             () => {
               state = RefreshState.DID_MOUNT;
@@ -165,7 +163,7 @@ export function usePullToRefresh<T extends HTMLElement>(
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
-              <RefreshControl />
+              {refreshControl}
             </RefreshControlProvider>,
             refresherRoot,
             () => {
@@ -196,7 +194,7 @@ export function usePullToRefresh<T extends HTMLElement>(
           debounceAnimate(destY, 0, throttle);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.REFRESHING }}>
-              <RefreshControl />
+              {refreshControl}
             </RefreshControlProvider>,
             refresherRoot,
             () => {
