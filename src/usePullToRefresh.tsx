@@ -6,7 +6,7 @@ import { toFixed } from './toFixed';
 import { debounceTimingFn } from './debounceTimingFn';
 import { rAF } from './rAF';
 import { IRefreshControlProps, RefreshControl } from './RefreshControl';
-import { RefreshControlContext } from './RefreshControlContext';
+import { RefreshControlProvider } from './RefreshControlContext';
 
 export type RefreshCallback = () => Promise<void | undefined>;
 
@@ -141,9 +141,9 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (distance > 0) {
           const ref = React.createRef<HTMLDivElement>();
           ReactDOM.render(
-            <RefreshControlContext.Provider value={state}>
+            <RefreshControlProvider value={RefreshState.DID_MOUNT}>
               <RefreshControl />
-            </RefreshControlContext.Provider>,
+            </RefreshControlProvider>,
             refresherRoot,
             () => {
               state = RefreshState.DID_MOUNT;
@@ -167,9 +167,9 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (destY >= threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
-            <RefreshControlContext.Provider value={state}>
+            <RefreshControlProvider value={RefreshState.WILL_REFRESH}>
               <RefreshControl />
-            </RefreshControlContext.Provider>,
+            </RefreshControlProvider>,
             refresherRoot,
             () => {
               state = RefreshState.WILL_REFRESH;
@@ -198,9 +198,9 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (state === RefreshState.WILL_REFRESH) {
           debounceAnimate(destY, 0, throttle);
           ReactDOM.render(
-            <RefreshControlContext.Provider value={state}>
+            <RefreshControlProvider value={RefreshState.REFRESHING}>
               <RefreshControl />
-            </RefreshControlContext.Provider>,
+            </RefreshControlProvider>,
             refresherRoot,
             () => {
               state = RefreshState.REFRESHING;

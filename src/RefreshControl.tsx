@@ -2,7 +2,7 @@ import React, { ReactNode, forwardRef } from 'react';
 import styled from 'styled-components';
 import { RefreshState } from './RefreshState';
 import { Indicator } from './Indicator';
-import { RefreshControlContext } from './RefreshControlContext';
+import { RefreshControlConsumer } from './RefreshControlContext';
 
 export interface IRefreshControlProps {
   /**
@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 
 export const RefreshControl = forwardRef<HTMLDivElement, IRefreshControlProps>(
   ({ hint = <p>下拉可以刷新</p>, edge = <p>释放后刷新</p>, indicator = <Indicator /> }, ref) => (
-    <RefreshControlContext.Consumer>
+    <RefreshControlConsumer>
       {(state) => (
         <Wrapper ref={ref}>
           {state === RefreshState.DID_MOUNT && hint}
@@ -35,6 +35,6 @@ export const RefreshControl = forwardRef<HTMLDivElement, IRefreshControlProps>(
           {state === RefreshState.REFRESHING && indicator}
         </Wrapper>
       )}
-    </RefreshControlContext.Consumer>
+    </RefreshControlConsumer>
   ),
 );
