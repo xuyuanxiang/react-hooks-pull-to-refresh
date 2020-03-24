@@ -1,7 +1,11 @@
 import { createContext } from 'react';
 import { RefreshState } from './RefreshState';
 
-const RefreshControlContext = createContext<RefreshState>(RefreshState.INITIALIZING);
+export interface IRefreshContext {
+  state: RefreshState;
+}
+
+const RefreshControlContext = createContext<IRefreshContext>({ state: RefreshState.INITIALIZING });
 
 RefreshControlContext.displayName = 'RefreshControlContext';
 

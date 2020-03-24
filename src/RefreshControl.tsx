@@ -32,7 +32,7 @@ export function RefreshControl({
 }: IRefreshControlProps): JSX.Element {
   return (
     <RefreshControlConsumer>
-      {(state) => (
+      {({ state }) => (
         <Wrapper>
           {state === RefreshState.DID_MOUNT && hint}
           {state === RefreshState.WILL_REFRESH && edge}

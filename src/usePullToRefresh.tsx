@@ -146,7 +146,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (distance > 0) {
           transformY('-100%');
           ReactDOM.render(
-            <RefreshControlProvider value={RefreshState.DID_MOUNT}>
+            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>
               <RefreshControl />
             </RefreshControlProvider>,
             refresherRoot,
@@ -164,7 +164,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (destY >= threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
-            <RefreshControlProvider value={RefreshState.WILL_REFRESH}>
+            <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
               <RefreshControl />
             </RefreshControlProvider>,
             refresherRoot,
@@ -195,7 +195,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         if (state === RefreshState.WILL_REFRESH) {
           debounceAnimate(destY, 0, throttle);
           ReactDOM.render(
-            <RefreshControlProvider value={RefreshState.REFRESHING}>
+            <RefreshControlProvider value={{ state: RefreshState.REFRESHING }}>
               <RefreshControl />
             </RefreshControlProvider>,
             refresherRoot,
