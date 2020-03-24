@@ -17,6 +17,7 @@ export default [
       typescript({
         tsconfigOverride: {
           compilerOptions: { module: 'es2015', declaration: true, sourceMap: true },
+          include: ['src', 'types'],
         },
       }),
       commonjs({
@@ -36,6 +37,7 @@ export default [
       typescript({
         tsconfigOverride: {
           compilerOptions: { module: 'es2015' },
+          include: ['src', 'types'],
         },
       }),
       commonjs({

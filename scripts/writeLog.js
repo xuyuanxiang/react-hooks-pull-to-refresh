@@ -15,7 +15,7 @@ stream.on('end', () => {
 
 function write(data) {
   writeFile(
-    'src/__stories__/Changelog.stories.mdx',
+    'stories/Changelog.stories.mdx',
     `import { Meta } from '@storybook/addon-docs/blocks';
 
 <Meta title="Basic|发布日志" />

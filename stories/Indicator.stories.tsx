@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Indicator } from '../';
+import { Indicator } from '../src';
 
 storiesOf('Components|Indicator', module)
   .addParameters({ component: Indicator })

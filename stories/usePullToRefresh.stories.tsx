@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
-import { usePullToRefresh } from '../';
+import { usePullToRefresh } from '../src';
 
-storiesOf('Hooks|usePullToRefresh', module).add('示例', function App(): JSX.Element {
+storiesOf('Hooks|usePullToRefresh', module).add('Demo', function App(): JSX.Element {
   const DATA = [
     '雷杰',
     '黄刚',
