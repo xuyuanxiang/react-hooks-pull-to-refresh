@@ -20,6 +20,7 @@ before_deploy:
   - npm run build
 deploy:
   - provider: npm
+    edge: true
     email: chaos@xuyuanxiang.cn
     on:
       tags: true
