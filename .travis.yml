@@ -14,12 +14,10 @@ notifications:
     on_failure: always
 scripts:
   - npm install codecov -g
-before_deploy:
-  - npm run compile
-  - npm run gen
-  - npm run build
 deploy:
   - provider: npm
+    script:
+      - npm run compile
     edge: true
     email: chaos@xuyuanxiang.cn
     on:
@@ -28,6 +26,9 @@ deploy:
     api_key:
       secure: Fst6lMF/5PQg6e5VIcF1AXGVuTm40boG0YK4z1sIy+bRvGkIC41cBh8ZBdr7SX8ukFEwAOR1TfvhFI5fu/EuZadPSfWcgYqZQaXjJXMAB5u/EvvzD13BIpARFFbjNxJa0nBLAYbtRIzadqaZ+OmY5NvXiCVW7Aqb6Ix+UttAiK0l/8wasVMugyprzGJb3bXfGgCNe3PlS+4qf4LoPXW/oJjIwqmYbpeZz5WlRNWHNearXgVtkMmAZMQZV/WST28KehM8zeYw/BJ8cJWasZYs6f73gPLm63vfi9tkNm9xqRK8tUZLor2gR83EJf792Q1Z0jyYYoX2YWKd/SadIPE6UbqkYdpUBmprviyPxnBMIiaZTbblqIXYmsJVqjDfWtuKr5LkNwElwp9bVyD71MVVkVp98LdIDRtBPNllZ8ns7Dcd4XLDrL/SIaJdoMMA50z9GGP2JY9k9rTpLgG3P/IqiQvlRJx83N9RjE1YNIbAPmI5+f1RxUGmuHYG/SjF23NXmwjtO1bC+oFja+LozrS1sIoxlrhlw1aDfpZl84M9DFtaJalhQxRLk6/Zojb0/ReI0R26RZqBLM3RFLQ4naNtM6z/Bp27tloNqFQIwau0iBkVUOKqRvMiW67lU4HYbwu6AT55KPF6+HMpv6kNbK9XxnmKlpC2nHDUWhrlrENaDCk=
   - provider: pages
+    script:
+      - npm run gen
+      - npm run build
     skip_cleanup: true
     email: chaos@xuyuanxiang.cn
     github_token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
@@ -37,4 +38,4 @@ deploy:
       branch: master
       repo: xuyuanxiang/react-hooks-pull-to-refresh
 after_success:
-  - codecov
+  - codecov -f coverage/*.json
