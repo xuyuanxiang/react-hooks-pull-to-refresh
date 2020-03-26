@@ -42,7 +42,6 @@ export function usePullToRefresh<T extends HTMLElement>(
 ): RefObject<T> {
   const containerRef = useRef<T>(null);
   let refresherRoot: HTMLDivElement | undefined;
-  let _threshold = threshold;
   let isAnimating = false;
 
   function getScrollTop(): number {
@@ -118,7 +117,6 @@ export function usePullToRefresh<T extends HTMLElement>(
       originWebkitTransform = style.webkitTransform;
       originTransition = style.transition;
       originWebkitTransition = style.webkitTransition;
-      _threshold += containerRef.current.getBoundingClientRect().top;
     }
 
     function disableBodyMove(event: TouchEvent | MouseEvent): void {
@@ -178,7 +176,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         const startY = destY;
         destY += distance;
         debounceAnimate(startY, destY, duration);
-        if (distance >= _threshold) {
+        if (distance >= threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
