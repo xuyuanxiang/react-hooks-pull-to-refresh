@@ -16,10 +16,34 @@ describe('<RefreshControl/>', () => {
     document.body.removeChild(root);
   });
 
-  it('should render default props', () => {
+  it('should render default hint', () => {
     act(() => {
       ReactDOM.render(
         <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>
+          <RefreshControl />
+        </RefreshControlProvider>,
+        root,
+      );
+    });
+    expect(document.documentElement).toMatchSnapshot();
+  });
+
+  it('should render default edge', () => {
+    act(() => {
+      ReactDOM.render(
+        <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
+          <RefreshControl />
+        </RefreshControlProvider>,
+        root,
+      );
+    });
+    expect(document.documentElement).toMatchSnapshot();
+  });
+
+  it('should render default indicator', () => {
+    act(() => {
+      ReactDOM.render(
+        <RefreshControlProvider value={{ state: RefreshState.REFRESHING }}>
           <RefreshControl />
         </RefreshControlProvider>,
         root,

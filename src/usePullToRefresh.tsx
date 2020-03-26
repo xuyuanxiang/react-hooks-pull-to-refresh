@@ -43,6 +43,7 @@ export function usePullToRefresh<T extends HTMLElement>(
   const containerRef = useRef<T>(null);
   let refresherRoot: HTMLDivElement | undefined;
   let _threshold = threshold;
+  let isAnimating = false;
 
   function getScrollTop(): number {
     if (deps && typeof deps[0] === 'number') {
@@ -72,7 +73,6 @@ export function usePullToRefresh<T extends HTMLElement>(
   function debounceAnimate(startY: number, destY: number, duration: number): void {
     const startTime = Date.now();
     const endTime = startTime + duration;
-    let isAnimating = true;
 
     function step(): void {
       let now = Date.now();
@@ -82,12 +82,12 @@ export function usePullToRefresh<T extends HTMLElement>(
         return;
       }
 
-      now = (now - startTime) / duration;
-      const easing = debounceTimingFn(now);
-      const newY = (destY - startY) * easing + startY;
-      transformY(newY);
-
       if (isAnimating) {
+        now = (now - startTime) / duration;
+        const easing = debounceTimingFn(now);
+        const newY = (destY - startY) * easing + startY;
+        transformY(newY);
+
         rAF(step);
       }
     }
@@ -96,12 +96,15 @@ export function usePullToRefresh<T extends HTMLElement>(
       containerRef.current.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
       containerRef.current.style.webkitTransition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
     }
+
+    isAnimating = true;
     step();
   }
 
   useLayoutEffect(() => {
     let scrollTop = getScrollTop();
     let start: number = 0;
+    let startTimestamp: number = 0;
     let distance: number = 0;
     let destY: number = 0;
     let state: RefreshState | null = null;
@@ -124,13 +127,14 @@ export function usePullToRefresh<T extends HTMLElement>(
       if (event.type === 'touchstart') {
         const touch = (event as TouchEvent).touches[0];
         if (touch) {
-          start = touch.clientY;
+          start = touch.screenY;
         } else {
           start = 0;
         }
       } else {
-        start = (event as MouseEvent).clientY || 0;
+        start = (event as MouseEvent).screenY || 0;
       }
+      startTimestamp = event.timeStamp;
       state = RefreshState.INITIALIZING;
     }
 
@@ -141,9 +145,9 @@ export function usePullToRefresh<T extends HTMLElement>(
       if (event.type === 'touchmove') {
         const touch = (event as TouchEvent).touches[0];
         if (!touch) return;
-        distance = touch.clientY - start;
+        distance = touch.screenY - start;
       } else {
-        distance = ((event as MouseEvent).clientY || 0) - start;
+        distance = ((event as MouseEvent).screenY || 0) - start;
       }
       if (state === RefreshState.INITIALIZING) {
         if (distance > 0) {
@@ -163,10 +167,12 @@ export function usePullToRefresh<T extends HTMLElement>(
           );
         }
       } else if (state === RefreshState.DID_MOUNT) {
+        const duration = event.timeStamp - startTimestamp;
         const startY = destY;
         destY += distance;
-        debounceAnimate(startY, destY, throttle);
-        if (destY >= _threshold) {
+        debounceAnimate(startY, destY, duration);
+        console.log('distance=', distance);
+        if (distance >= _threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
@@ -192,6 +198,12 @@ export function usePullToRefresh<T extends HTMLElement>(
     }
 
     const teardown = (): void => {
+      state = RefreshState.DID_REFRESH;
+      start = 0;
+      distance = 0;
+      scrollTop = getScrollTop();
+      startTimestamp = 0;
+      isAnimating = false;
       if (containerRef.current) {
         containerRef.current.style.transform = originTransform;
         containerRef.current.style.webkitTransform = originWebkitTransform;
@@ -199,13 +211,9 @@ export function usePullToRefresh<T extends HTMLElement>(
         containerRef.current.style.webkitTransition = originWebkitTransition;
       }
       refresherRoot && ReactDOM.unmountComponentAtNode(refresherRoot);
-      state = RefreshState.DID_REFRESH;
     };
 
-    function handleGestureEnd(): void {
-      start = 0;
-      distance = 0;
-      scrollTop = getScrollTop();
+    function handleGestureEnd(event: TouchEvent | MouseEvent): void {
       if (state === RefreshState.WILL_REFRESH) {
         if (refresherRoot) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
@@ -225,6 +233,8 @@ export function usePullToRefresh<T extends HTMLElement>(
               }
             },
           );
+        } else {
+          teardown();
         }
       } else {
         teardown();
