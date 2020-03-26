@@ -1,6 +1,6 @@
 {
   "name": "react-hooks-pull-to-refresh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The pull-to-refresh user interface pattern implemented with React Hooks.",
   "keywords": [
     "react",
