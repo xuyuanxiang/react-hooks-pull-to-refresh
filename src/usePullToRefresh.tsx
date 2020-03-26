@@ -1,8 +1,8 @@
-import React, { createRef, DependencyList, ReactNode, RefObject, useLayoutEffect, useRef } from 'react';
+import React, { DependencyList, ReactNode, RefObject, useLayoutEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { toFixed } from './toFixed';
 import _throttle from 'lodash.throttle';
 import { RefreshState } from './RefreshState';
-import { toFixed } from './toFixed';
 import { debounceTimingFn } from './debounceTimingFn';
 import { rAF } from './rAF';
 import { RefreshControl } from './RefreshControl';
@@ -121,6 +121,16 @@ export function usePullToRefresh<T extends HTMLElement>(
       _threshold += containerRef.current.getBoundingClientRect().top;
     }
 
+    function disableBodyMove(event: TouchEvent | MouseEvent): void {
+      switch (state) {
+        case RefreshState.DID_MOUNT:
+        case RefreshState.WILL_REFRESH:
+        case RefreshState.REFRESHING:
+          event.preventDefault();
+          break;
+      }
+    }
+
     function handleGestureStart(event: TouchEvent | MouseEvent): void {
       if (state === RefreshState.REFRESHING) return;
       scrollTop = getScrollTop();
@@ -151,15 +161,12 @@ export function usePullToRefresh<T extends HTMLElement>(
       }
       if (state === RefreshState.INITIALIZING) {
         if (distance > 0) {
-          const ref = createRef<HTMLDivElement>();
           ReactDOM.render(
-            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>
-              <div ref={ref}>{refreshControl}</div>
-            </RefreshControlProvider>,
+            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>{refreshControl}</RefreshControlProvider>,
             refresherRoot,
             () => {
-              if (ref.current) {
-                const rect = ref.current.getBoundingClientRect();
+              if (refresherRoot) {
+                const rect = refresherRoot.getBoundingClientRect();
                 transformY(-(rect.height + rect.top));
               }
               state = RefreshState.DID_MOUNT;
@@ -171,7 +178,6 @@ export function usePullToRefresh<T extends HTMLElement>(
         const startY = destY;
         destY += distance;
         debounceAnimate(startY, destY, duration);
-        console.log('distance=', distance);
         if (distance >= _threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
@@ -186,16 +192,6 @@ export function usePullToRefresh<T extends HTMLElement>(
         }
       }
     }, throttle);
-
-    function disableBodyMove(event: TouchEvent | MouseEvent): void {
-      switch (state) {
-        case RefreshState.DID_MOUNT:
-        case RefreshState.WILL_REFRESH:
-        case RefreshState.REFRESHING:
-          event.preventDefault();
-          break;
-      }
-    }
 
     const teardown = (): void => {
       state = RefreshState.DID_REFRESH;
@@ -213,11 +209,11 @@ export function usePullToRefresh<T extends HTMLElement>(
       refresherRoot && ReactDOM.unmountComponentAtNode(refresherRoot);
     };
 
-    function handleGestureEnd(event: TouchEvent | MouseEvent): void {
+    function handleGestureEnd(): void {
       if (state === RefreshState.WILL_REFRESH) {
         if (refresherRoot) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
-          debounceAnimate(destY, 0, throttle);
+          debounceAnimate(destY, 0, threshold);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.REFRESHING }}>
               {refreshControl}
@@ -267,6 +263,7 @@ export function usePullToRefresh<T extends HTMLElement>(
       if (containerRef.current) {
         document.body.removeEventListener('touchmove', handleGestureMove);
         document.body.removeEventListener('touchstart', handleGestureStart);
+        document.body.removeEventListener('touchcancel', teardown);
         document.body.removeEventListener('touchend', handleGestureEnd);
         document.body.removeEventListener('mousedown', handleGestureMove);
         document.body.removeEventListener('mousemove', handleGestureStart);

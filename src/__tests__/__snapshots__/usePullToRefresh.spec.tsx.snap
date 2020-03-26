@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`usePullToRefresh should render edge 1`] = `
+<div>
+  <div
+    class="RefreshControl__Wrapper-m57r-0 fevrgl"
+  >
+    <p>
+      释放后刷新
+    </p>
+  </div>
+</div>
+`;
+
+exports[`usePullToRefresh should render empty 1`] = `<div />`;
+
+exports[`usePullToRefresh should render hint 1`] = `
+<div>
+  <div
+    class="RefreshControl__Wrapper-m57r-0 fevrgl"
+  >
+    <p>
+      下拉可以刷新
+    </p>
+  </div>
+</div>
+`;
+
+exports[`usePullToRefresh should render indicator 1`] = `
+<div>
+  <div
+    class="RefreshControl__Wrapper-m57r-0 fevrgl"
+  >
+    <span
+      class="Indicator__StyledIndicator-fjnyd8-0 bvlUUg"
+      color="#9b9b9b"
+      size="32"
+    />
+  </div>
+</div>
+`;
