@@ -18,6 +18,20 @@ yarn:
 yarn add react-hooks-pull-to-refresh
 ```
 
+## Requirement
+
+You need to install the following `peerDependencies` into your project at the same time:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "styled-components": ">= 4.1.4 || >= 5.0.0"
+  }
+}
+```
+
 ## Document & Usage
 
 [storybook](https://xuyuanxiang.github.io/react-hooks-pull-to-refresh)

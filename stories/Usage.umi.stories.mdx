@@ -4,9 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # 在[umi](https://umijs.org/zh/)中使用
 
-## model
-
-`src/models/foo.js`:
+## src/models/foo.js
 
 ```javascript
 import fetch from 'dva/fetch';
@@ -41,7 +39,7 @@ export default {
 };
 ```
 
-`src/pages/index.js`:
+## src/pages/index.js
 
 ```jsx
 import React from 'react';
@@ -66,7 +64,7 @@ export default connect(({ foo: { dataSource } }) => ({
 }))(Index);
 ```
 
-`mock/index.js`:
+## mock/index.js
 
 ```javascript
 import Mock from 'mockjs';
