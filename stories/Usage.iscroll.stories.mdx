@@ -1,0 +1,202 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Basic|和iscroll一起使用" />
+
+# 和 iscroll 一起使用
+
+使用`iscroll`用 transform 的方式模拟滚动效果时，需要监听 iScroll 实例的'scrollEnd'事件，获取滚动区视图的 scrollTop 告知`usePullToRefresh`:
+
+```typescript
+import React, { useState, useLayoutEffect, useRef } from 'react';
+import IScroll from 'iscroll';
+import { usePullToRefresh } from 'react-hooks-pull-to-refresh';
+
+const DATA = [
+  '雷杰',
+  '黄刚',
+  '薛涛',
+  '陈勇',
+  '姚明',
+  '郑勇',
+  '戴娜',
+  '萧勇',
+  '程涛',
+  '徐平',
+  '贺秀英',
+  '夏明',
+  '邵涛',
+  '熊秀兰',
+  '魏磊',
+  '侯秀英',
+  '杨芳',
+  '薛杰',
+  '徐明',
+  '曾杰',
+  '徐涛',
+  '康强',
+  '陈丽',
+  '何芳',
+  '廖静',
+  '谭超',
+  '汪涛',
+  '邵杰',
+  '崔丽',
+  '于敏',
+  '韩霞',
+  '何伟',
+  '吴平',
+  '贾勇',
+  '白明',
+  '薛艳',
+  '夏桂英',
+  '田丽',
+  '尹杰',
+  '乔军',
+  '赖明',
+  '赖娜',
+  '宋敏',
+  '任强',
+  '万强',
+  '赵秀英',
+  '许丽',
+  '乔静',
+  '钱伟',
+  '陈芳',
+  '郭强',
+  '马磊',
+  '卢艳',
+  '傅秀兰',
+  '熊芳',
+  '石刚',
+  '钱丽',
+  '汪秀兰',
+  '郭勇',
+  '范秀兰',
+  '董涛',
+  '文丽',
+  '叶娜',
+  '秦丽',
+  '何霞',
+  '何明',
+  '姜艳',
+  '冯勇',
+  '吕刚',
+  '万伟',
+  '武平',
+  '郭丽',
+  '赖涛',
+  '方涛',
+  '黄丽',
+  '苏秀英',
+  '杜霞',
+  '廖秀兰',
+  '高涛',
+  '蒋明',
+  '曹刚',
+  '龙艳',
+  '宋平',
+  '邵敏',
+  '廖芳',
+  '杨娟',
+  '田磊',
+  '吴军',
+  '罗娟',
+  '卢涛',
+  '余勇',
+  '龚军',
+  '郭丽',
+  '姚军',
+  '韩军',
+  '曾勇',
+  '锺刚',
+  '程静',
+  '邓娜',
+  '顾霞',
+];
+
+export default function App(): JSX.Element {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState<number>(0);
+  const [dataSource, setDataSource] = useState<string[]>(DATA.slice(Math.random() * (DATA.length - 1)));
+  let iScroll: IScroll;
+
+  function onScrollEnd() {
+    console.warn('onScrollEnd');
+    if (!iScroll) return;
+    const { y } = iScroll;
+    const scrollTop = Math.abs(y);
+    setScrollTop(scrollTop);
+  }
+
+  function disableBodyMove(event: TouchEvent) {
+    event.preventDefault();
+  }
+
+  useLayoutEffect(() => {
+    if (scrollContainerRef.current) {
+      iScroll = new IScroll(scrollContainerRef.current);
+      iScroll.on('scrollEnd', onScrollEnd);
+    }
+    document.body.addEventListener('touchmove', disableBodyMove, { passive: false });
+
+    return () => {
+      if (scrollContainerRef.current) {
+        iScroll.off('scrollEnd', onScrollEnd);
+        iScroll.destroy();
+      }
+      document.body.removeEventListener('touchmove', disableBodyMove);
+    };
+  });
+
+  const ref = usePullToRefresh<HTMLDivElement>(
+    () =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          setDataSource(dataSource.slice(Math.random() * (dataSource.length - 1)));
+          if (iScroll) {
+            iScroll.refresh();
+          }
+          resolve();
+        }, 2000);
+      }),
+    {},
+    [scrollTop],
+  );
+
+  return (
+    <div ref={ref} style={{ height: '100%' }}>
+      <div
+        ref={scrollContainerRef}
+        style={{ backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', height: '100%' }}
+      >
+        <div style={{ position: 'absolute', top: 0, right: 0, left: 0, width: '100%', height: 'auto' }}>
+          {dataSource.map((it, idx) => (
+            <div key={`item_${idx}`} style={{ height: 100, borderBottom: '1px solid #dcdcdc' }}>
+              {it}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+附全局样式：
+
+```html
+<style type="text/css">
+  * {
+    margin: 0;
+  }
+  html,
+  body,
+  #root {
+    background: #f6f6f6;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-scrolling: touch;
+    height: 100%;
+  }
+</style>
+```

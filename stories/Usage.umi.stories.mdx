@@ -1,0 +1,83 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Basic|在umi中使用" />
+
+# 在[umi](https://umijs.org/zh/)中使用
+
+## model
+
+`src/models/foo.js`:
+
+```javascript
+import fetch from 'dva/fetch';
+
+export default {
+  namespace: 'foo',
+  state: {
+    dataSource: [],
+  },
+  subscriptions: {
+    setup({ dispatch }) {
+      dispatch({ type: 'fetch' });
+    },
+  },
+  effects: {
+    *fetch(action, { put }) {
+      const res = yield fetch('/api/v1/foo');
+      const { code, data } = yield res.json();
+      if (code === 200) {
+        yield put({
+          type: 'fulfilled',
+          payload: data,
+        });
+      }
+    },
+  },
+  reducers: {
+    fulfilled(state, action) {
+      state.dataSource = action.payload;
+    },
+  },
+};
+```
+
+`src/pages/index.js`:
+
+```jsx
+import React from 'react';
+import { connect } from 'dva';
+import { usePullToRefresh } from 'react-hooks-pull-to-refresh';
+
+function Index({ dataSource, dispatch }) {
+  const ref = usePullToRefresh(() => dispatch({ type: 'foo/fetch' }));
+  return (
+    <div ref={ref} style={{ background: '#ffffff' }}>
+      {dataSource.map((it, idx) => (
+        <div key={`item_${idx}`} style={{ borderBottom: '1px solid #dcdcdc', padding: 32 }}>
+          {it}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default connect(({ foo: { dataSource } }) => ({
+  dataSource,
+}))(Index);
+```
+
+`mock/index.js`:
+
+```javascript
+import Mock from 'mockjs';
+
+export default {
+  'GET /api/v1/foo': (req, res) =>
+    res.json(
+      Mock.mock({
+        code: 200,
+        'data|20-100': ['@cname()'],
+      }),
+    ),
+};
+```

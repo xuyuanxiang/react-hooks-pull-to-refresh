@@ -4,12 +4,12 @@ import { Indicator } from '../src';
 
 storiesOf('Components|Indicator', module)
   .addParameters({ component: Indicator })
-  .add('Default', function App(): JSX.Element {
+  .add('默认样式', function App(): JSX.Element {
     return <Indicator />;
   })
-  .add('Custom Color', function App(): JSX.Element {
+  .add('自定义颜色', function App(): JSX.Element {
     return <Indicator color="green" />;
   })
-  .add('Custom Size', function App(): JSX.Element {
+  .add('自定义尺寸', function App(): JSX.Element {
     return <Indicator size={44} />;
   });

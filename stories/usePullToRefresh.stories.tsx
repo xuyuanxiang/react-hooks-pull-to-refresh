@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { usePullToRefresh } from '../src';
+import styled from 'styled-components';
 
-storiesOf('Hooks|usePullToRefresh', module).add('Demo', function App(): JSX.Element {
+const List = styled.div`
+  height: 44px;
+  line-height: 44px;
+  border-bottom: 1px solid #dcdcdc;
+  padding-left: 16px;
+`;
+
+storiesOf('Hooks|usePullToRefresh', module).add('演示', function App(): JSX.Element {
   const DATA = [
     '雷杰',
     '黄刚',
@@ -120,9 +128,7 @@ storiesOf('Hooks|usePullToRefresh', module).add('Demo', function App(): JSX.Elem
   return (
     <div ref={ref} style={{ background: '#ffffff' }}>
       {dataSource.map((it, idx) => (
-        <div key={`item_${idx}`} style={{ height: 44, lineHeight: 44, borderBottom: '1px solid #dcdcdc' }}>
-          {it}
-        </div>
+        <List key={`item_${idx}`}>{it}</List>
       ))}
     </div>
   );

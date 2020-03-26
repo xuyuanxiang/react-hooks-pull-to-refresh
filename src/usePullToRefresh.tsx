@@ -1,4 +1,4 @@
-import React, { DependencyList, RefObject, useLayoutEffect, useRef, ReactNode } from 'react';
+import React, { createRef, DependencyList, ReactNode, RefObject, useLayoutEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import _throttle from 'lodash.throttle';
 import { RefreshState } from './RefreshState';
@@ -26,7 +26,7 @@ export interface IUsePullToRefreshOptions {
 }
 
 const DEFAULTS: IUsePullToRefreshOptions = {
-  threshold: 50,
+  threshold: 45,
   throttle: 150,
   refreshControl: <RefreshControl />,
 };
@@ -42,6 +42,7 @@ export function usePullToRefresh<T extends HTMLElement>(
 ): RefObject<T> {
   const containerRef = useRef<T>(null);
   let refresherRoot: HTMLDivElement | undefined;
+  let _threshold = threshold;
 
   function getScrollTop(): number {
     if (deps && typeof deps[0] === 'number') {
@@ -114,6 +115,7 @@ export function usePullToRefresh<T extends HTMLElement>(
       originWebkitTransform = style.webkitTransform;
       originTransition = style.transition;
       originWebkitTransition = style.webkitTransition;
+      _threshold += containerRef.current.getBoundingClientRect().top;
     }
 
     function handleGestureStart(event: TouchEvent | MouseEvent): void {
@@ -133,6 +135,7 @@ export function usePullToRefresh<T extends HTMLElement>(
     }
 
     const handleGestureMove = _throttle((event: TouchEvent | MouseEvent): void => {
+      disableBodyMove(event);
       if (!refresherRoot) return;
       if (scrollTop !== 0) return;
       if (event.type === 'touchmove') {
@@ -144,22 +147,26 @@ export function usePullToRefresh<T extends HTMLElement>(
       }
       if (state === RefreshState.INITIALIZING) {
         if (distance > 0) {
-          transformY('-100%');
+          const ref = createRef<HTMLDivElement>();
           ReactDOM.render(
-            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>{refreshControl}</RefreshControlProvider>,
+            <RefreshControlProvider value={{ state: RefreshState.DID_MOUNT }}>
+              <div ref={ref}>{refreshControl}</div>
+            </RefreshControlProvider>,
             refresherRoot,
             () => {
+              if (ref.current) {
+                const rect = ref.current.getBoundingClientRect();
+                transformY(-(rect.height + rect.top));
+              }
               state = RefreshState.DID_MOUNT;
             },
           );
         }
-      }
-
-      if (state === RefreshState.DID_MOUNT) {
+      } else if (state === RefreshState.DID_MOUNT) {
         const startY = destY;
         destY += distance;
         debounceAnimate(startY, destY, throttle);
-        if (destY >= threshold) {
+        if (destY >= _threshold) {
           ReactDOM.unmountComponentAtNode(refresherRoot);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.WILL_REFRESH }}>
@@ -174,7 +181,7 @@ export function usePullToRefresh<T extends HTMLElement>(
       }
     }, throttle);
 
-    function disableBodyMove(event: TouchEvent): void {
+    function disableBodyMove(event: TouchEvent | MouseEvent): void {
       switch (state) {
         case RefreshState.DID_MOUNT:
         case RefreshState.WILL_REFRESH:
@@ -184,13 +191,24 @@ export function usePullToRefresh<T extends HTMLElement>(
       }
     }
 
+    const teardown = (): void => {
+      if (containerRef.current) {
+        containerRef.current.style.transform = originTransform;
+        containerRef.current.style.webkitTransform = originWebkitTransform;
+        containerRef.current.style.transition = originTransition;
+        containerRef.current.style.webkitTransition = originWebkitTransition;
+      }
+      refresherRoot && ReactDOM.unmountComponentAtNode(refresherRoot);
+      state = RefreshState.DID_REFRESH;
+    };
+
     function handleGestureEnd(): void {
       start = 0;
       distance = 0;
       scrollTop = getScrollTop();
-      if (refresherRoot) {
-        ReactDOM.unmountComponentAtNode(refresherRoot);
-        if (state === RefreshState.WILL_REFRESH) {
+      if (state === RefreshState.WILL_REFRESH) {
+        if (refresherRoot) {
+          ReactDOM.unmountComponentAtNode(refresherRoot);
           debounceAnimate(destY, 0, throttle);
           ReactDOM.render(
             <RefreshControlProvider value={{ state: RefreshState.REFRESHING }}>
@@ -202,37 +220,28 @@ export function usePullToRefresh<T extends HTMLElement>(
               if (typeof onRefresh === 'function') {
                 const promiseLike = onRefresh();
                 if (promiseLike && typeof promiseLike.then === 'function') {
-                  const teardown = (): void => {
-                    if (containerRef.current) {
-                      containerRef.current.style.transform = originTransform;
-                      containerRef.current.style.webkitTransform = originWebkitTransform;
-                      containerRef.current.style.transition = originTransition;
-                      containerRef.current.style.webkitTransition = originWebkitTransition;
-                    }
-                    refresherRoot && ReactDOM.unmountComponentAtNode(refresherRoot);
-                    state = RefreshState.DID_REFRESH;
-                  };
                   promiseLike.then(teardown, teardown);
                 }
               }
             },
           );
-          return;
         }
+      } else {
+        teardown();
       }
-      state = null;
     }
 
     if (containerRef.current) {
-      containerRef.current.addEventListener('touchstart', handleGestureStart, { passive: true });
-      containerRef.current.addEventListener('touchmove', handleGestureMove, { passive: true });
-      containerRef.current.addEventListener('touchend', handleGestureEnd, { passive: true });
-      containerRef.current.addEventListener('mousedown', handleGestureStart, { passive: true });
-      containerRef.current.addEventListener('mousemove', handleGestureMove, { passive: true });
-      containerRef.current.addEventListener('mouseup', handleGestureEnd, { passive: true });
+      document.body.addEventListener('touchstart', handleGestureStart, { passive: true });
+      document.body.addEventListener('touchmove', handleGestureMove, { passive: false });
+      document.body.addEventListener('touchend', handleGestureEnd, { passive: true });
+      document.body.addEventListener('touchcancel', teardown, { passive: true });
+      document.body.addEventListener('mousedown', handleGestureStart, { passive: true });
+      document.body.addEventListener('mousemove', handleGestureMove, { passive: false });
+      document.body.addEventListener('mouseup', handleGestureEnd, { passive: true });
 
       // 禁用iOS橡皮筋，以及微信网站信息
-      document.body.addEventListener('touchmove', disableBodyMove, { passive: false });
+      // document.body.addEventListener('touchmove', disableBodyMove, { passive: false });
 
       if (!refresherRoot) {
         refresherRoot = document.createElement('div');
@@ -246,12 +255,12 @@ export function usePullToRefresh<T extends HTMLElement>(
 
     return () => {
       if (containerRef.current) {
-        containerRef.current.removeEventListener('touchmove', handleGestureMove);
-        containerRef.current.removeEventListener('touchstart', handleGestureStart);
-        containerRef.current.removeEventListener('touchend', handleGestureEnd);
-        containerRef.current.removeEventListener('mousedown', handleGestureMove);
-        containerRef.current.removeEventListener('mousemove', handleGestureStart);
-        containerRef.current.removeEventListener('mouseup', handleGestureEnd);
+        document.body.removeEventListener('touchmove', handleGestureMove);
+        document.body.removeEventListener('touchstart', handleGestureStart);
+        document.body.removeEventListener('touchend', handleGestureEnd);
+        document.body.removeEventListener('mousedown', handleGestureMove);
+        document.body.removeEventListener('mousemove', handleGestureStart);
+        document.body.removeEventListener('mouseup', handleGestureEnd);
         containerRef.current.style.transform = originTransform;
         containerRef.current.style.webkitTransform = originWebkitTransform;
         containerRef.current.style.transition = originTransition;
@@ -265,7 +274,7 @@ export function usePullToRefresh<T extends HTMLElement>(
         }
       }
 
-      document.body.removeEventListener('touchmove', disableBodyMove);
+      // document.body.removeEventListener('touchmove', disableBodyMove);
     };
   }, deps);
 
