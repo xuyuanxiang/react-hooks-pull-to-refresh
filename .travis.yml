@@ -33,8 +33,5 @@ deploy:
     github_token: $GITHUB_TOKEN
     keep_history: true
     local_dir: public
-    on:
-      tags: true
-      repo: xuyuanxiang/react-hooks-pull-to-refresh
 after_success:
   - codecov

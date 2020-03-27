@@ -6,15 +6,15 @@ import { RefreshControlConsumer } from './RefreshControlContext';
 
 export interface IRefreshControlProps {
   /**
-   * 滚动视图已经到达顶部后，继续下拉显示 hint。
+   * When the scroll view reaches the top, `hint` appears with the user's pull action.
    */
   hint?: ReactNode;
   /**
-   * 已经显示 hint 后，继续下拉距离达到 threshold 属性所传距离后显示edge。
+   * `edge` will display instead of `hint` when the pulled distance has reached the threshold value
    */
   edge?: ReactNode;
   /**
-   * 已经显示 edge 后，用户释放手指（touchend)，会调用onRefresh，在Promise返回结果前一直显示 indicator。
+   * `indicator` will keep in view during `onRefresh` pending
    */
   indicator?: ReactNode;
 }

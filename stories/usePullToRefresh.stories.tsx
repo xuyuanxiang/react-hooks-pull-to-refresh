@@ -10,7 +10,7 @@ const List = styled.div`
   padding-left: 16px;
 `;
 
-storiesOf('Hooks|usePullToRefresh', module).add('演示', function App(): JSX.Element {
+storiesOf('Hooks|usePullToRefresh', module).add('Demo', function App(): JSX.Element {
   const DATA = [
     '雷杰',
     '黄刚',
@@ -95,23 +95,6 @@ storiesOf('Hooks|usePullToRefresh', module).add('演示', function App(): JSX.El
     '曹刚',
     '龙艳',
     '宋平',
-    '邵敏',
-    '廖芳',
-    '杨娟',
-    '田磊',
-    '吴军',
-    '罗娟',
-    '卢涛',
-    '余勇',
-    '龚军',
-    '郭丽',
-    '姚军',
-    '韩军',
-    '曾勇',
-    '锺刚',
-    '程静',
-    '邓娜',
-    '顾霞',
   ];
   const [dataSource, setDataSource] = useState<string[]>(DATA);
 

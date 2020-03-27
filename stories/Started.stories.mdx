@@ -1,0 +1,154 @@
+import { Meta, Props } from '@storybook/addon-docs/blocks';
+import { RefreshControl } from '../src';
+
+<Meta title="Basic|Get Started" />
+
+# Installation
+
+npm:
+
+```npm
+npm install react-hooks-pull-to-refresh --save
+```
+
+yarn:
+
+```shell
+yarn add react-hooks-pull-to-refresh
+```
+
+# Requirement
+
+You need to install the following `peerDependencies` into your project at the same time:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "styled-components": ">= 4.1.4 || >= 5.0.0"
+  }
+}
+```
+
+# Usage
+
+```typescript jsx
+import React, { useState } from 'react';
+import { usePullToRefresh } from 'react-hooks-pull-to-refresh';
+
+function MyComponent() {
+  const [dataSource, setDataSource] = useState<string[]>([]);
+
+  const onRefresh = async (): Promise<void> => {
+    const res = await fetch('/api/to/something');
+    if (res.ok) {
+      const { data } = await res.json();
+      setDataSource(data);
+    }
+  };
+
+  const options = {}; // see the table below
+  const refresherRef = usePullToRefresh(onRefresh, options);
+
+  return (
+    <div ref={refresherRef} style={{ background: '#ffffff' }}>
+      {dataSource.map((it, idx) => (
+        <p key={`item_${idx}`}>{it}</p>
+      ))}
+    </div>
+  );
+}
+```
+
+`usePullToRefresh` options:
+
+| Name | Description | Default |
+| :-- | :-- | :-- |
+| threshold | Threshold in pixels for calling `onRefresh`. The content view have been pulled to within **threshold** of the bottom. | 45 |
+| throttle | This controls how often the `touchmove` event will be handled（as a time interval in ms）. A lower number yields better accuracy for code that is tracking the touchmove position, but can lead to performance problems. | 150 |
+| refreshControl | A RefreshControl component, used to provide pull-to-refresh rendering functionality. | RefreshControl |
+
+RefreshControl Component Props:
+
+<Props of={RefreshControl} />
+
+Custom hint, edge and indicator props:
+
+```typescript
+import React, { useState } from 'react';
+import { usePullToRefresh, RefreshControl } from 'react-hooks-pull-to-refresh';
+
+function MyComponent() {
+  const [dataSource, setDataSource] = useState<string[]>([]);
+
+  const onRefresh = async (): Promise<void> => {
+    const res = await fetch('/api/to/something');
+    if (res.ok) {
+      const { data } = await res.json();
+      setDataSource(data);
+    }
+  };
+
+  const options = {
+    refreshControl: <RefreshControl hint="👇pull" edge="👆" indicator="Loading..." />,
+  };
+  const refresherRef = usePullToRefresh(onRefresh, options);
+
+  return (
+    <div ref={refresherRef} style={{ background: '#ffffff' }}>
+      {dataSource.map((it, idx) => (
+        <p key={`item_${idx}`}>{it}</p>
+      ))}
+    </div>
+  );
+}
+```
+
+Custom implementation of the whole `refreshControl`:
+
+```typescript
+import React from 'react';
+import { RefreshControlConsumer, RefreshState } from 'react-hooks-pull-to-refresh';
+
+function MyRefreshControl() {
+  return (
+    <RefreshControlConsumer>
+      {({ state }) => {
+        if (state === RefreshState.REFRESHING) {
+          return <div>Loading...</div>;
+        } else if (state === RefreshState.DID_MOUNT) {
+          return <p>👇 pull</p>;
+        } else if (state === RefreshState.WILL_REFRESH) {
+          return <p>👆 release</p>;
+        }
+      }}
+    </RefreshControlConsumer>
+  );
+}
+
+function MyComponent() {
+  const [dataSource, setDataSource] = useState<string[]>([]);
+
+  const onRefresh = async (): Promise<void> => {
+    const res = await fetch('/api/to/something');
+    if (res.ok) {
+      const { data } = await res.json();
+      setDataSource(data);
+    }
+  };
+
+  const options = {
+    refreshControl: <MyRefreshControl />,
+  };
+  const refresherRef = usePullToRefresh(onRefresh, options);
+
+  return (
+    <div ref={refresherRef} style={{ background: '#ffffff' }}>
+      {dataSource.map((it, idx) => (
+        <p key={`item_${idx}`}>{it}</p>
+      ))}
+    </div>
+  );
+}
+```
