@@ -32,6 +32,35 @@ You need to install the following `peerDependencies` into your project at the sa
 }
 ```
 
-## Document & Usage
+## Usage
+
+```typescript jsx
+import React, { useState } from 'react';
+import { usePullToRefresh } from 'react-hooks-pull-to-refresh';
+
+function MyComponent() {
+  const [dataSource, setDataSource] = useState<string[]>([]);
+
+  const onRefresh = async (): Promise<void> => {
+    const res = await fetch('/api/to/something');
+    if (res.ok) {
+      const { data } = await res.json();
+      setDataSource(data);
+    }
+  };
+
+  const refresherRef = usePullToRefresh(onRefresh);
+
+  return (
+    <ul ref={refresherRef}>
+      {dataSource.map((it, idx) => (
+        <li key={`item_${idx}`}>{it}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Document
 
 [storybook](https://xuyuanxiang.github.io/react-hooks-pull-to-refresh)
